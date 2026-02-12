@@ -1,10 +1,8 @@
 -- ============================================================================
 -- SEED DATA: Initial Yuura Information
 -- ============================================================================
--- Run this AFTER schema.sql to populate initial talent data
--- ============================================================================
 
--- Insert Yuura's basic info
+-- Yuura's basic info
 -- TODO: Replace placeholder values with actual data from her channel
 INSERT INTO talents (name, handle, youtube_id, debut_date, description)
 VALUES (
@@ -17,13 +15,21 @@ VALUES (
 );
 
 -- Insert initial milestone targets
--- These will be updated with predictions once you have data
+-- These will be updated with predictions once we have data
 INSERT INTO milestones (talent_id, target_subs, status)
 SELECT
     id,
     target,
     'pending'
-FROM talents, (VALUES (50000), (75000), (100000), (150000), (200000)) AS t(target)
+FROM talents, (VALUES
+    (25000),   -- Very close!
+    (30000),   -- Short-term
+    (40000),   -- Medium-term
+    (50000),   -- Major goal
+    (67000),   -- Funny goal
+    (75000),   -- Long-term
+    (100000)   -- Dream goal
+) AS t(target)
 WHERE name = 'Yuura Yozakura';
 
 -- Verify data was inserted

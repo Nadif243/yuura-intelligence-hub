@@ -4,7 +4,7 @@
 -- Purpose: Track Yuura's growth, content, lore, and song performances
 -- Database: PostgreSQL (Supabase)
 -- Author: Nanafi
--- Created: 2026-02-11
+-- Created: 2026-02-12
 -- ============================================================================
 
 -- Enable UUID extension (Supabase has this by default, but just in case)
@@ -23,6 +23,7 @@ CREATE TABLE talents (
     handle TEXT UNIQUE NOT NULL, -- Twitter/YouTube handle (e.g., @YuuraYozakura)
     youtube_id TEXT UNIQUE NOT NULL, -- Channel ID from YouTube
     debut_date DATE,
+    agency TEXT DEFAULT 'Project Livium', -- Her agency
     avatar_url TEXT, -- Profile picture URL
     banner_url TEXT, -- Channel banner URL
     description TEXT, -- About section
@@ -73,8 +74,17 @@ CREATE TABLE content (
 
     -- CATEGORY: What was it about? (broad categorization)
     primary_category TEXT CHECK (primary_category IN (
-        'music', 'gaming', 'chatting', 'asmr', 'announcement', 'collab', 'other'
+        'music',        -- Karaoke, original songs, covers
+        'gaming',       -- Game streams
+        'chatting',     -- Free talk, zatsudan
+        'special',      -- Menggebu, BTS, special series
+        'milestone',    -- Celebrations, anniversaries, important announcements
+        'collab',       -- With other VTubers
+        'shorts'        -- If she does YouTube Shorts differently than regular content
     )),
+
+    -- Language: Primary language of the stream (important for multilingual content)
+    primary_language TEXT CHECK (primary_language IN ('JP', 'ID', 'EN', 'mixed')),
 
     duration_seconds INTEGER,
     thumbnail_url TEXT,
@@ -85,9 +95,10 @@ CREATE TABLE content (
 
 -- Index for finding recent content
 CREATE INDEX idx_content_published ON content(talent_id, published_at DESC);
-
 -- Index for filtering by category
 CREATE INDEX idx_content_category ON content(primary_category) WHERE primary_category IS NOT NULL;
+-- Index for filtery by language
+CREATE INDEX idx_content_language ON content(primary_language) WHERE primary_language IS NOT NULL;
 
 -- ============================================================================
 -- TABLE 4: CONTENT_METRICS
@@ -109,11 +120,30 @@ CREATE TABLE content_metrics (
     avg_ccv INTEGER,  -- Average concurrent viewers
 
     recorded_at TIMESTAMPTZ DEFAULT NOW()
+    recorded_date DATE -- Automatically set from recorded_at
 );
 
 -- Add the unique constraint AFTER the table, using an index instead:
+-- Use DATE type column instead of casting
+ALTER TABLE content_metrics ADD COLUMN recorded_date DATE;
+
+-- Update it automatically from recorded_at
+CREATE OR REPLACE FUNCTION set_recorded_date()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.recorded_date = NEW.recorded_at::date;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+CREATE TRIGGER set_content_metrics_date
+    BEFORE INSERT OR UPDATE ON content_metrics
+    FOR EACH ROW EXECUTE FUNCTION set_recorded_date();
+
+-- Now we can create the unique constraint
+-- One snapshot per content per day
 CREATE UNIQUE INDEX idx_metrics_unique_daily
-    ON content_metrics(content_id, (recorded_at::date));
+    ON content_metrics(content_id, recorded_date);
 
 -- Index for time-series queries per video
 CREATE INDEX idx_metrics_content_time ON content_metrics(content_id, recorded_at DESC);
@@ -133,7 +163,7 @@ CREATE TABLE songs (
 
     -- Metadata
     genre TEXT,
-    language TEXT, -- 'JP', 'EN', 'ID', etc.
+    language TEXT CHECK (language IN ('JP', 'ID', 'EN', 'other')),
 
     first_sung_at TIMESTAMPTZ, -- When Yuura first sang this song
 
@@ -143,10 +173,10 @@ CREATE TABLE songs (
 
 -- Prevent duplicate songs (case-insensitive check on title + artist)
 CREATE UNIQUE INDEX idx_songs_unique
-    ON songs(LOWER(title), LOWER(COALESCE(original_artist, '')));
+    ON songs(title, COALESCE(original_artist, ''));
 
 -- Index for searching songs by title
-CREATE INDEX idx_songs_title ON songs(LOWER(title));
+CREATE INDEX idx_songs_title_search ON songs USING gin(to_tsvector('simple', title));
 
 -- ============================================================================
 -- TABLE 6: SONG_PERFORMANCES
@@ -165,7 +195,12 @@ CREATE TABLE song_performances (
 
     -- Your quality assessment
     performance_quality TEXT CHECK (performance_quality IN (
-        'flawless', 'decent', 'for_fun', 'practice', 'unrated'
+        'flawless',  -- Perfect execution
+        'decent',    -- Good performance
+        'for_fun',   -- Casual, not serious
+        'practice',  -- Practicing new song
+        'emotional', -- Really felt it, even if not perfect
+        'unrated'    -- Haven't assessed yet
     )) DEFAULT 'unrated',
 
     notes TEXT, -- Optional context (e.g., "First time singing this", "Requested by chat")
@@ -194,13 +229,14 @@ CREATE TABLE lore_tags (
 
     -- Type of tag
     tag_type TEXT CHECK (tag_type IN (
-        'topic',      -- General subject (e.g., 'debut_talk')
-        'character',  -- Character/persona mentions
-        'series',     -- Recurring series (e.g., 'Project Livium')
-        'reference',  -- References to other content/creators
-        'milestone',  -- Special events (e.g., '10K_celebration')
-        'game',       -- Game title for gaming streams
-        'collab'      -- Collaboration partner
+        'series',     -- Menggebu, Popping
+        'game',       -- Minecraft, Valorant, etc.
+        'collab',     -- Squad Kocak, individual collab partners
+        'topic',      -- General subject matter
+        'lore',       -- Project Livium worldbuilding, character background
+        'milestone',  -- Subscriber goals, anniversaries
+        'mood',       -- Chill stream, high energy, emotional, etc.
+        'reference'   -- References to other content/creators
     )) NOT NULL,
 
     tag_value TEXT NOT NULL, -- e.g., 'Project Livium', 'Minecraft', 'anniversary'
@@ -223,10 +259,8 @@ CREATE TABLE lore_tags (
 
 -- Index: "All tags of type X"
 CREATE INDEX idx_lore_type ON lore_tags(tag_type, tag_value);
-
 -- Index: "All tags for content Y"
 CREATE INDEX idx_lore_content ON lore_tags(content_id);
-
 -- Full-text search on tag values (for searching lore)
 CREATE INDEX idx_lore_search ON lore_tags USING gin(to_tsvector('english', tag_value));
 
