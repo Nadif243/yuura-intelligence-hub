@@ -47,5 +47,6 @@ tmp/
 secrets/
 credentials.json
 
-
+# Personal
+necessities/
 notes
