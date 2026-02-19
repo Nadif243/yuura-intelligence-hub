@@ -77,7 +77,7 @@ CREATE TABLE content (
         'music',        -- Karaoke, original songs, covers
         'gaming',       -- Game streams
         'chatting',     -- Free talk, zatsudan
-        'special',      -- Menggebu, BTS, special series
+        'special',      -- Menggebu, BTS, Karaokethon, Donothon, etc.
         'milestone',    -- Celebrations, anniversaries, important announcements
         'collab',       -- With other VTubers
         'shorts'        -- If she does YouTube Shorts differently than regular content
@@ -120,7 +120,6 @@ CREATE TABLE content_metrics (
     avg_ccv INTEGER,  -- Average concurrent viewers
 
     recorded_at TIMESTAMPTZ DEFAULT NOW()
-    recorded_date DATE -- Automatically set from recorded_at
 );
 
 -- Add the unique constraint AFTER the table, using an index instead:
@@ -245,7 +244,7 @@ CREATE TABLE lore_tags (
 
     -- How was this tag created?
     extraction_method TEXT CHECK (extraction_method IN (
-        'manual',    -- You tagged it
+        'manual',    -- Manual tag
         'keyword',   -- Script found keyword in title/description
         'ai',        -- AI extraction from transcript
         'community'  -- Submitted by fans (future feature)
