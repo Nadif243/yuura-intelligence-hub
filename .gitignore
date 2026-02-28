@@ -42,6 +42,7 @@ logs/
 temp/
 tmp/
 *.tmp
+test/
 
 # Secrets (add any file with sensitive info)
 secrets/
