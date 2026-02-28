@@ -23,7 +23,7 @@ SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY')
 
 # Channel Configuration
-YUURA_CHANNEL_ID = os.getenv('YUURA_CHANNEL_ID', 'UC0ZYul2i5OcyKbdKB2v1O2w')
+YUURA_CHANNEL_ID = os.getenv('YUURA_CHANNEL_ID', 'UCrmtSeYObZJNG6OIC7Pw-_A')
 
 # Validation (optional but good practice)
 def validate_config():
