@@ -15,10 +15,9 @@
 The Yuura Intelligence Hub is a full-stack data science project that collects, analyzes, and visualizes performance metrics for a VTuber's channel. The system tracks subscriber growth velocity, content performance patterns, song repertoire evolution, and community engagement trends.
 
 **Current Stats Being Tracked:**
-- 25.1+ subscribers
-- 696+ videos analyzed
+- 25.8+ subscribers
+- 701+ videos analyzed
 - 3-5 streams per week
-- Multilingual content (Japanese, Indonesian, English)
 
 ---
 ## Motivation
@@ -94,7 +93,8 @@ songs (1) ────→ song_performances (many)  [Song repertoire]
 - [x] ERD modeling with 8 normalized tables
 - [x] GitHub repository setup
 - [x] Supabase PostgreSQL instance configured
-- [ ] YouTube API integration
+- [x] YouTube API integration
+- [x] Content categorization
 - [ ] Automated snapshot collection (cron jobs)
 - [ ] Growth velocity calculation scripts
 - [ ] Milestone prediction model (linear regression → time-series forecasting)
@@ -136,11 +136,11 @@ This project hopefully demonstrates proficiency in:
 ---
 ## ℹ️ About
 
-Built by a physics undergraduate shifting focuses into data science, combining computational physics experience with web development skills to create meaningful analytics tools.
+Built by a physics undergraduate slightly shifting focuses into data science, combining computational physics experience with web development skills to create meaningful analytics tools.
 
 **Why Yuura Yozakura?**
-As a fan and community member, I wanted to create something that provides value back to the creator and demonstrates real-world data science application beyond academic exercises.
+As a fan and community member, I wanted to create something that provides value back to the creator and demonstrates real-world data science application beyond academic exercises. And to contribute of what i can do to support this creator, as one of their supporter that has been there for quite a while, while having little to none contribution by art and entertainment medium from where the creator lies heavily into.
 
 ---
 
-*Last Updated: 19 February 2026*
+*Last Updated: 02 March 2026*
