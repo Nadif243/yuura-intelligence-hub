@@ -70,7 +70,7 @@ CREATE TABLE content (
     published_at TIMESTAMPTZ NOT NULL,
 
     -- FORMAT: How was it delivered?
-    format TEXT CHECK (format IN ('stream', 'vod', 'short', 'premiere', 'clip')) NOT NULL,
+    format TEXT CHECK (format IN ('stream', 'vod', 'video', 'short', 'premiere')) NOT NULL,
 
     -- CATEGORY: What was it about? (broad categorization)
     primary_category TEXT CHECK (primary_category IN (
